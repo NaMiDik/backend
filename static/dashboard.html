@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Finance Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .logout-btn {
+      background-color: #d9534f;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Особистий фінансовий кабінет</h2>
+  <button class="logout-btn" onclick="logout()">Вийти</button>
+
+  <h3>Ваші транзакції:</h3>
+  <table id="transactions-table">
+    <thead>
+      <tr>
+        <th>Сума</th>
+        <th>Опис</th>
+        <th>Дата</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const token = localStorage.getItem("access_token"); // ключ має бути таким, як у index.html
+
+    if (!token) {
+      alert("Сесія завершена. Будь ласка, увійдіть заново.");
+      window.location.href = "/static/index.html";
+    }
+
+    fetch("http://127.0.0.1:8000/transactions/", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    })
+    .then(async res => {
+      if (!res.ok) {
+        if (res.status === 401) {
+          alert("Сесія закінчилась. Увійдіть знову.");
+          localStorage.removeItem("access_token");
+          window.location.href = "/static/index.html";
+        } else {
+          const errText = await res.text();
+          alert("Помилка: " + errText);
+        }
+        return;
+      }
+
+      return res.json();
+    })
+    .then(data => {
+      if (!data) return;
+      const tbody = document.querySelector("#transactions-table tbody");
+      data.forEach(tx => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${tx.amount} грн</td>
+          <td>${tx.description}</td>
+          <td>${new Date(tx.date).toLocaleDateString('uk-UA')}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(err => {
+      alert("Помилка при завантаженні транзакцій: " + err.message);
+    });
+
+    function logout() {
+      localStorage.removeItem("access_token");
+      window.location.href = "/static/index.html";
+    }
+  </script>
+</body>
+</html>
