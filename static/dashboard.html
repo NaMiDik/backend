@@ -2,99 +2,424 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <title>Finance Dashboard</title>
+  <title>Особистий фінансовий кабінет</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-    .logout-btn {
-      background-color: #d9534f;
-      color: white;
-      padding: 8px 16px;
-      border: none;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 1rem auto; padding: 1rem; }
+    h2, h3 { margin-top: 1.5rem; }
+    form { margin-bottom: 2rem; border: 1px solid #ccc; padding: 1rem; border-radius: 6px; }
+    label { display: block; margin: 0.5rem 0; }
+    input, select, button { margin-top: 0.2rem; padding: 0.3rem; width: 100%; max-width: 300px; }
+    button { width: auto; cursor: pointer; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 0.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; }
+    .item-actions button { margin-left: 0.5rem; }
   </style>
 </head>
 <body>
   <h2>Особистий фінансовий кабінет</h2>
-  <button class="logout-btn" onclick="logout()">Вийти</button>
+  <button onclick="logout()">Вийти</button>
 
-  <h3>Ваші транзакції:</h3>
-  <table id="transactions-table">
-    <thead>
-      <tr>
-        <th>Сума</th>
-        <th>Опис</th>
-        <th>Дата</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <!-- Відображення юзернейму -->
+  <p id="username"></p>
+
+  <!-- Транзакції -->
+  <h3>Ваші транзакції</h3>
+  <ul id="transactions-list"></ul>
+
+  <!-- Форма додавання транзакції -->
+  <h3>Додати / Редагувати транзакцію</h3>
+  <form id="transaction-form">
+    <input type="hidden" id="transaction-id" />
+    <label>Категорія:
+      <select id="transaction-category" required></select>
+    </label>
+    <label>Сума:
+      <input type="number" step="0.01" id="transaction-amount" required />
+    </label>
+    <label>Опис:
+      <input type="text" id="transaction-description" />
+    </label>
+    <label>Дата транзакції:
+      <input type="date" id="transaction-date" required />
+    </label>
+    <button type="submit">Зберегти транзакцію</button>
+    <button type="button" id="transaction-cancel-btn" style="display:none;">Відмінити</button>
+  </form>
+
+  <hr>
+
+  <!-- Категорії -->
+  <h3>Категорії</h3>
+  <ul id="categories-list"></ul>
+
+  <!-- Форма додавання категорії -->
+  <h3>Додати / Редагувати категорію</h3>
+  <form id="category-form">
+    <input type="hidden" id="category-id" />
+    <label>Назва:
+      <input type="text" id="category-name" required />
+    </label>
+    <label>Тип:
+      <select id="category-type" required>
+        <option value="income">Доходи</option>
+        <option value="expense">Витрати</option>
+      </select>
+    </label>
+    <button type="submit">Зберегти категорію</button>
+    <button type="button" id="category-cancel-btn" style="display:none;">Відмінити</button>
+  </form>
+
+  <hr>
+
+  <!-- Бюджети -->
+  <h3>Бюджети</h3>
+  <ul id="budgets-list"></ul>
+
+  <!-- Форма додавання бюджету -->
+  <h3>Додати / Редагувати бюджет</h3>
+  <form id="budget-form">
+    <input type="hidden" id="budget-id" />
+    <label>Категорія:
+      <select id="budget-category" required></select>
+    </label>
+    <label>Ліміт (грн):
+      <input type="number" step="0.01" id="budget-amount" required />
+    </label>
+    <label>Місяць:
+      <input type="month" id="budget-month" required />
+    </label>
+    <button type="submit">Зберегти бюджет</button>
+    <button type="button" id="budget-cancel-btn" style="display:none;">Відмінити</button>
+  </form>
 
   <script>
-    const token = localStorage.getItem("access_token"); // ключ має бути таким, як у index.html
+    const API_URL = 'http://127.0.0.1:8000';
+    const token = localStorage.getItem('access_token');
+    if (!token) window.location.href = "/";
 
-    if (!token) {
-      alert("Сесія завершена. Будь ласка, увійдіть заново.");
-      window.location.href = "/static/index.html";
+    // Додамо заголовок авторизації для fetch
+    const authHeaders = {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    };
+
+    // Ініціалізація даних і елементів
+    const usernameElem = document.getElementById('username');
+
+    // --- Функції для користувача (якщо хочеш, можна через API діставати ім'я) ---
+    usernameElem.textContent = "Привіт!";
+
+    // --- Транзакції ---
+    const transactionsList = document.getElementById('transactions-list');
+    const transactionForm = document.getElementById('transaction-form');
+    const transactionIdInput = document.getElementById('transaction-id');
+    const transactionCategorySelect = document.getElementById('transaction-category');
+    const transactionAmountInput = document.getElementById('transaction-amount');
+    const transactionDescriptionInput = document.getElementById('transaction-description');
+    const transactionDateInput = document.getElementById('transaction-date');
+    const transactionCancelBtn = document.getElementById('transaction-cancel-btn');
+
+    // --- Категорії ---
+    const categoriesList = document.getElementById('categories-list');
+    const categoryForm = document.getElementById('category-form');
+    const categoryIdInput = document.getElementById('category-id');
+    const categoryNameInput = document.getElementById('category-name');
+    const categoryTypeSelect = document.getElementById('category-type');
+    const categoryCancelBtn = document.getElementById('category-cancel-btn');
+
+    // --- Бюджети ---
+    const budgetsList = document.getElementById('budgets-list');
+    const budgetForm = document.getElementById('budget-form');
+    const budgetIdInput = document.getElementById('budget-id');
+    const budgetCategorySelect = document.getElementById('budget-category');
+    const budgetAmountInput = document.getElementById('budget-amount');
+    const budgetMonthInput = document.getElementById('budget-month');
+    const budgetCancelBtn = document.getElementById('budget-cancel-btn');
+
+    // ------------------ ФУНКЦІЇ ЗАПИТІВ ------------------------
+
+    // Запит GET зі стандартними заголовками
+    async function getData(endpoint) {
+      const res = await fetch(`${API_URL}${endpoint}`, { headers: authHeaders });
+      if (!res.ok) throw new Error(`Error fetching ${endpoint}: ${res.status}`);
+      return res.json();
     }
 
-    fetch("http://127.0.0.1:8000/transactions/", {
-      headers: {
-        Authorization: "Bearer " + token
-      }
-    })
-    .then(async res => {
-      if (!res.ok) {
-        if (res.status === 401) {
-          alert("Сесія закінчилась. Увійдіть знову.");
-          localStorage.removeItem("access_token");
-          window.location.href = "/static/index.html";
-        } else {
-          const errText = await res.text();
-          alert("Помилка: " + errText);
-        }
-        return;
-      }
-
-      return res.json();
-    })
-    .then(data => {
-      if (!data) return;
-      const tbody = document.querySelector("#transactions-table tbody");
-      data.forEach(tx => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${tx.amount} грн</td>
-          <td>${tx.description}</td>
-          <td>${new Date(tx.date).toLocaleDateString('uk-UA')}</td>
-        `;
-        tbody.appendChild(row);
+    // Запит POST/PUT/DELETE
+    async function sendData(endpoint, method, data) {
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method,
+        headers: authHeaders,
+        body: JSON.stringify(data)
       });
-    })
-    .catch(err => {
-      alert("Помилка при завантаженні транзакцій: " + err.message);
-    });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Error sending data");
+      }
+      return res.json();
+    }
+
+    // ------------------ ОНОВЛЕННЯ ІНТЕРФЕЙСУ -------------------
+
+    // Завантажити і показати транзакції
+    async function loadTransactions() {
+      try {
+        const transactions = await getData('/transactions/');
+        transactionsList.innerHTML = '';
+        transactions.forEach(tx => {
+          const li = document.createElement('li');
+          li.textContent = `${tx.amount.toFixed(2)} грн — ${tx.description || ''} (${tx.transaction_date})`;
+          // кнопки редагувати і видалити
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Редагувати';
+          editBtn.onclick = () => editTransaction(tx);
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Видалити';
+          delBtn.onclick = () => deleteTransaction(tx.id);
+          const actions = document.createElement('span');
+          actions.className = 'item-actions';
+          actions.append(editBtn, delBtn);
+          li.appendChild(actions);
+          transactionsList.appendChild(li);
+        });
+      } catch (e) {
+        alert('Помилка завантаження транзакцій: ' + e.message);
+      }
+    }
+
+    // Завантажити і показати категорії
+    async function loadCategories() {
+      try {
+        const categories = await getData('/categories/');
+        categoriesList.innerHTML = '';
+        transactionCategorySelect.innerHTML = '';
+        budgetCategorySelect.innerHTML = '';
+        categories.forEach(cat => {
+          // Список категорій для перегляду
+          const li = document.createElement('li');
+          li.textContent = `${cat.name} (${cat.type})`;
+          // Редагування/видалення
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Редагувати';
+          editBtn.onclick = () => editCategory(cat);
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Видалити';
+          delBtn.onclick = () => deleteCategory(cat.id);
+          const actions = document.createElement('span');
+          actions.className = 'item-actions';
+          actions.append(editBtn, delBtn);
+          li.appendChild(actions);
+          categoriesList.appendChild(li);
+
+          // Опції в селектах форм транзакцій і бюджетів
+          const option1 = document.createElement('option');
+          option1.value = cat.id;
+          option1.textContent = cat.name + " (" + cat.type + ")";
+          transactionCategorySelect.appendChild(option1);
+
+          const option2 = document.createElement('option');
+          option2.value = cat.id;
+          option2.textContent = cat.name + " (" + cat.type + ")";
+          budgetCategorySelect.appendChild(option2);
+        });
+      } catch(e) {
+        alert('Помилка завантаження категорій: ' + e.message);
+      }
+    }
+
+    // Завантажити і показати бюджети
+    async function loadBudgets() {
+      try {
+        const budgets = await getData('/budgets/');
+        budgetsList.innerHTML = '';
+        budgets.forEach(budget => {
+          const li = document.createElement('li');
+          li.textContent = `${budget.amount_limit.toFixed(2)} грн — ${budget.month} — Категорія: ${budget.category.name}`;
+          // Редагувати / Видалити
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Редагувати';
+          editBtn.onclick = () => editBudget(budget);
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Видалити';
+          delBtn.onclick = () => deleteBudget(budget.id);
+          const actions = document.createElement('span');
+          actions.className = 'item-actions';
+          actions.append(editBtn, delBtn);
+          li.appendChild(actions);
+          budgetsList.appendChild(li);
+        });
+      } catch (e) {
+        alert('Помилка завантаження бюджетів: ' + e.message);
+      }
+    }
+
+    // ------------------ РЕДАГУВАННЯ ----------------------------
+
+    function editTransaction(tx) {
+      transactionIdInput.value = tx.id;
+      transactionCategorySelect.value = tx.category_id || '';
+      transactionAmountInput.value = tx.amount;
+      transactionDescriptionInput.value = tx.description || '';
+      transactionDateInput.value = tx.transaction_date;
+      transactionCancelBtn.style.display = 'inline';
+    }
+
+    function editCategory(cat) {
+      categoryIdInput.value = cat.id;
+      categoryNameInput.value = cat.name;
+      categoryTypeSelect.value = cat.type;
+      categoryCancelBtn.style.display = 'inline';
+    }
+
+    function editBudget(budget) {
+      budgetIdInput.value = budget.id;
+      budgetCategorySelect.value = budget.category_id;
+      budgetAmountInput.value = budget.amount_limit;
+      budgetMonthInput.value = budget.month;
+      budgetCancelBtn.style.display = 'inline';
+    }
+
+    // ------------------ ВІДМІНА РЕДАГУВАННЯ ----------------------
+
+    transactionCancelBtn.onclick = () => {
+      transactionForm.reset();
+      transactionIdInput.value = '';
+      transactionCancelBtn.style.display = 'none';
+    };
+
+    categoryCancelBtn.onclick = () => {
+      categoryForm.reset();
+      categoryIdInput.value = '';
+      categoryCancelBtn.style.display = 'none';
+    };
+
+    budgetCancelBtn.onclick = () => {
+      budgetForm.reset();
+      budgetIdInput.value = '';
+      budgetCancelBtn.style.display = 'none';
+    };
+
+    // ------------------ ВИДАЛЕННЯ -----------------------------
+
+    async function deleteTransaction(id) {
+      if (!confirm('Видалити транзакцію?')) return;
+      try {
+        await sendData(`/transactions/${id}`, 'DELETE');
+        loadTransactions();
+      } catch (e) {
+        alert('Помилка видалення транзакції: ' + e.message);
+      }
+    }
+
+    async function deleteCategory(id) {
+      if (!confirm('Видалити категорію?')) return;
+      try {
+        await sendData(`/categories/${id}`, 'DELETE');
+        loadCategories();
+        loadTransactions();
+        loadBudgets();
+      } catch (e) {
+        alert('Помилка видалення категорії: ' + e.message);
+      }
+    }
+
+    async function deleteBudget(id) {
+      if (!confirm('Видалити бюджет?')) return;
+      try {
+        await sendData(`/budgets/${id}`, 'DELETE');
+        loadBudgets();
+      } catch (e) {
+        alert('Помилка видалення бюджету: ' + e.message);
+      }
+    }
+
+    // ------------------ ДОДАВАННЯ/ОНОВЛЕННЯ ---------------------
+
+    transactionForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = transactionIdInput.value;
+      const data = {
+        category_id: transactionCategorySelect.value || null,
+        amount: parseFloat(transactionAmountInput.value),
+        description: transactionDescriptionInput.value,
+        transaction_date: transactionDateInput.value
+      };
+      try {
+        if (id) {
+          await sendData(`/transactions/${id}`, 'PUT', data);
+        } else {
+          await sendData('/transactions/', 'POST', data);
+        }
+        transactionForm.reset();
+        transactionCancelBtn.style.display = 'none';
+        loadTransactions();
+      } catch (e) {
+        alert('Помилка збереження транзакції: ' + e.message);
+      }
+    };
+
+    categoryForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = categoryIdInput.value;
+      const data = {
+        name: categoryNameInput.value,
+        type: categoryTypeSelect.value
+      };
+      try {
+        if (id) {
+          await sendData(`/categories/${id}`, 'PUT', data);
+        } else {
+          await sendData('/categories/', 'POST', data);
+        }
+        categoryForm.reset();
+        categoryCancelBtn.style.display = 'none';
+        loadCategories();
+        loadTransactions();
+        loadBudgets();
+      } catch (e) {
+        alert('Помилка збереження категорії: ' + e.message);
+      }
+    };
+
+    budgetForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = budgetIdInput.value;
+      const data = {
+        category_id: budgetCategorySelect.value,
+        amount_limit: parseFloat(budgetAmountInput.value),
+        month: budgetMonthInput.value
+      };
+      try {
+        if (id) {
+          await sendData(`/budgets/${id}`, 'PUT', data);
+        } else {
+          await sendData('/budgets/', 'POST', data);
+        }
+        budgetForm.reset();
+        budgetCancelBtn.style.display = 'none';
+        loadBudgets();
+      } catch (e) {
+        alert('Помилка збереження бюджету: ' + e.message);
+      }
+    };
+
+    // ------------------ ІНІЦІАЛІЗАЦІЯ ----------------------------
+
+    async function init() {
+      try {
+        await loadCategories();
+        await loadTransactions();
+        await loadBudgets();
+      } catch (e) {
+        alert('Помилка ініціалізації: ' + e.message);
+      }
+    }
+
+    init();
 
     function logout() {
-      localStorage.removeItem("access_token");
-      window.location.href = "/static/index.html";
+      localStorage.removeItem('access_token');
+      window.location.href = '/';
     }
   </script>
 </body>

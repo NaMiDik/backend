@@ -31,3 +31,49 @@ class Transaction(BaseModel):
 
     class Config:
         from_attributes = True
+
+class TransactionBase(BaseModel):
+    category_id: Optional[int]
+    amount: float
+    description: Optional[str] = None
+    transaction_date: date
+
+class TransactionCreate(TransactionBase):
+    pass
+
+class Transaction(TransactionBase):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True  # замість orm_mode у Pydantic v2
+
+class CategoryBase(BaseModel):
+    name: str
+    type: str  # 'income' або 'expense'
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class Category(CategoryBase):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
+
+class BudgetBase(BaseModel):
+    category_id: int
+    amount_limit: float
+    month: str  # формат 'YYYY-MM'
+
+class BudgetCreate(BudgetBase):
+    pass
+
+class Budget(BudgetBase):
+    id: int
+    user_id: int
+    category: Optional[Category]
+
+    class Config:
+        from_attributes = True

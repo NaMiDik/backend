@@ -18,8 +18,8 @@ app.include_router(budgets.router)
 
 origins = [
     "http://localhost",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
+    "http://localhost:3000",  # або порт вашого фронтенда
+    "http://127.0.0.1:8000",
 ]
 
 app.add_middleware(
@@ -33,6 +33,5 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return FileResponse(os.path.join(static_path, "index.html"))
-
 
 
