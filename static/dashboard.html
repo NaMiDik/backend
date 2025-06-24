@@ -3,113 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <title>Особистий фінансовий кабінет</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 1rem auto; padding: 1rem; }
-    h2, h3 { margin-top: 1.5rem; }
-    form { margin-bottom: 2rem; border: 1px solid #ccc; padding: 1rem; border-radius: 6px; }
-    label { display: block; margin: 0.5rem 0; }
-    input, select, button { margin-top: 0.2rem; padding: 0.3rem; width: 100%; max-width: 300px; }
-    button { width: auto; cursor: pointer; }
-    ul { list-style: none; padding-left: 0; }
-    li { margin-bottom: 0.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; }
-    .item-actions button { margin-left: 0.5rem; }
-  </style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 1100px;
+    margin: 1rem auto;
+    padding: 1rem;
+    background: linear-gradient(135deg, #87CEFA 0%, #C0C0C0 100%);
+    color: #222;
+  }
+
+  h2, h3 {
+    margin-top: 1.5rem;
+    color: #0D47A1; /* темно-синій відтінок для заголовків */
+  }
+
+  .section {
+    margin-bottom: 2rem;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: rgba(255 255 255 / 0.85);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+
+  .graph-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  canvas {
+    max-width: 320px;
+    max-height: 240px; /* щоб не було дуже високі */
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+  }
+
+  form {
+    margin-top: 1rem;
+  }
+
+  label {
+    display: block;
+    margin: 0.4rem 0 0.1rem 0;
+    font-weight: 600;
+    color: #1A237E;
+  }
+
+  input, select, button {
+    margin-top: 0.2rem;
+    padding: 0.4rem 0.5rem;
+    width: 100%;
+    max-width: 280px;
+    border: 1px solid #90CAF9;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  input:focus, select:focus {
+    border-color: #0D47A1;
+    outline: none;
+    box-shadow: 0 0 6px #0D47A1aa;
+  }
+
+  button {
+    width: auto;
+    cursor: pointer;
+    background-color: #1976D2;
+    border: none;
+    color: white;
+    font-weight: 700;
+    margin-top: 0.8rem;
+    border-radius: 4px;
+    padding: 0.5rem 1.2rem;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #0D47A1;
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #90CAF9;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: inset 0 1px 4px #90caf933;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.4rem;
+    font-size: 0.95rem;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .item-actions button {
+    margin-left: 0.5rem;
+    background-color: #64B5F6;
+    border: none;
+    color: #fff;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+  }
+
+  .item-actions button:hover {
+    background-color: #1976D2;
+  }
+</style>
 </head>
 <body>
   <h2>Особистий фінансовий кабінет</h2>
   <button onclick="logout()">Вийти</button>
-
-  <!-- Відображення юзернейму -->
   <p id="username"></p>
 
-  <!-- Транзакції -->
-  <h3>Ваші транзакції</h3>
-  <ul id="transactions-list"></ul>
+  <div class="grid-container">
+    <div class="section">
+      <h3>Ваші транзакції</h3>
+      <ul id="transactions-list"></ul>
+    </div>
 
-  <!-- Форма додавання транзакції -->
-  <h3>Додати / Редагувати транзакцію</h3>
-  <form id="transaction-form">
-    <input type="hidden" id="transaction-id" />
-    <label>Категорія:
-      <select id="transaction-category" required></select>
-    </label>
-    <label>Сума:
-      <input type="number" step="0.01" id="transaction-amount" required />
-    </label>
-    <label>Опис:
-      <input type="text" id="transaction-description" />
-    </label>
-    <label>Дата транзакції:
-      <input type="date" id="transaction-date" required />
-    </label>
-    <button type="submit">Зберегти транзакцію</button>
-    <button type="button" id="transaction-cancel-btn" style="display:none;">Відмінити</button>
-  </form>
+    <div class="section">
+      <h3>Додати / Редагувати транзакцію</h3>
+      <form id="transaction-form">
+        <input type="hidden" id="transaction-id" />
+        <label>Категорія:
+          <select id="transaction-category" required></select>
+        </label>
+        <label>Сума:
+          <input type="number" step="0.01" id="transaction-amount" required />
+        </label>
+        <label>Опис:
+          <input type="text" id="transaction-description" />
+        </label>
+        <label>Дата транзакції:
+          <input type="date" id="transaction-date" required />
+        </label>
+        <button type="submit">Зберегти транзакцію</button>
+        <button type="button" id="transaction-cancel-btn" style="display:none;">Відмінити</button>
+      </form>
+    </div>
 
-  <hr>
+    <div class="section">
+      <h3>Категорії</h3>
+      <ul id="categories-list"></ul>
 
-  <!-- Категорії -->
-  <h3>Категорії</h3>
-  <ul id="categories-list"></ul>
+      <h3>Додати / Редагувати категорію</h3>
+      <form id="category-form">
+        <input type="hidden" id="category-id" />
+        <label>Назва:
+          <input type="text" id="category-name" required />
+        </label>
+        <label>Тип:
+          <select id="category-type" required>
+            <option value="income">Доходи</option>
+            <option value="expense">Витрати</option>
+          </select>
+        </label>
+        <button type="submit">Зберегти категорію</button>
+        <button type="button" id="category-cancel-btn" style="display:none;">Відмінити</button>
+      </form>
+    </div>
 
-  <!-- Форма додавання категорії -->
-  <h3>Додати / Редагувати категорію</h3>
-  <form id="category-form">
-    <input type="hidden" id="category-id" />
-    <label>Назва:
-      <input type="text" id="category-name" required />
-    </label>
-    <label>Тип:
-      <select id="category-type" required>
-        <option value="income">Доходи</option>
-        <option value="expense">Витрати</option>
-      </select>
-    </label>
-    <button type="submit">Зберегти категорію</button>
-    <button type="button" id="category-cancel-btn" style="display:none;">Відмінити</button>
-  </form>
+    <div class="section">
+      <h3>Додати / Редагувати бюджет</h3>
+      <ul id="budgets-list"></ul>
+      <form id="budget-form">
+        <input type="hidden" id="budget-id" />
+        <label>Категорія:
+          <select id="budget-category" required></select>
+        </label>
+        <label>Ліміт (грн):
+          <input type="number" step="0.01" id="budget-amount" required />
+        </label>
+        <label>Місяць:
+          <input type="month" id="budget-month" required />
+        </label>
+        <button type="submit">Зберегти бюджет</button>
+        <button type="button" id="budget-cancel-btn" style="display:none;">Відмінити</button>
+      </form>
+    </div>
+  </div>
 
-  <hr>
-
-  <!-- Бюджети -->
-  <h3>Бюджети</h3>
-  <ul id="budgets-list"></ul>
-
-  <!-- Форма додавання бюджету -->
-  <h3>Додати / Редагувати бюджет</h3>
-  <form id="budget-form">
-    <input type="hidden" id="budget-id" />
-    <label>Категорія:
-      <select id="budget-category" required></select>
-    </label>
-    <label>Ліміт (грн):
-      <input type="number" step="0.01" id="budget-amount" required />
-    </label>
-    <label>Місяць:
-      <input type="month" id="budget-month" required />
-    </label>
-    <button type="submit">Зберегти бюджет</button>
-    <button type="button" id="budget-cancel-btn" style="display:none;">Відмінити</button>
-  </form>
+  <div class="section">
+    <h3>Візуалізація фінансів</h3>
+    <div class="graph-container">
+      <canvas id="incomeExpenseChart" width="350" height="350"></canvas>
+      <canvas id="expenseByCategoryChart" width="350" height="350"></canvas>
+      <canvas id="monthlyBalanceChart" width="350" height="350"></canvas>
+      <canvas id="expensesByTypeChart" width="350" height="350"></canvas>
+    </div>
+  </div>
 
   <script>
+    // Логіка роботи з API, формами, списками — додавай сюди код з dashboard.js
+
     const API_URL = 'http://127.0.0.1:8000';
     const token = localStorage.getItem('access_token');
     if (!token) window.location.href = "/";
 
-    // Додамо заголовок авторизації для fetch
     const authHeaders = {
       "Authorization": "Bearer " + token,
       "Content-Type": "application/json"
     };
 
-    // Ініціалізація даних і елементів
     const usernameElem = document.getElementById('username');
-
-    // --- Функції для користувача (якщо хочеш, можна через API діставати ім'я) ---
     usernameElem.textContent = "Привіт!";
 
-    // --- Транзакції ---
+    // Елементи для транзакцій
     const transactionsList = document.getElementById('transactions-list');
     const transactionForm = document.getElementById('transaction-form');
     const transactionIdInput = document.getElementById('transaction-id');
@@ -119,7 +241,7 @@
     const transactionDateInput = document.getElementById('transaction-date');
     const transactionCancelBtn = document.getElementById('transaction-cancel-btn');
 
-    // --- Категорії ---
+    // Елементи для категорій
     const categoriesList = document.getElementById('categories-list');
     const categoryForm = document.getElementById('category-form');
     const categoryIdInput = document.getElementById('category-id');
@@ -127,7 +249,7 @@
     const categoryTypeSelect = document.getElementById('category-type');
     const categoryCancelBtn = document.getElementById('category-cancel-btn');
 
-    // --- Бюджети ---
+    // Елементи для бюджетів
     const budgetsList = document.getElementById('budgets-list');
     const budgetForm = document.getElementById('budget-form');
     const budgetIdInput = document.getElementById('budget-id');
@@ -136,16 +258,12 @@
     const budgetMonthInput = document.getElementById('budget-month');
     const budgetCancelBtn = document.getElementById('budget-cancel-btn');
 
-    // ------------------ ФУНКЦІЇ ЗАПИТІВ ------------------------
-
-    // Запит GET зі стандартними заголовками
     async function getData(endpoint) {
       const res = await fetch(`${API_URL}${endpoint}`, { headers: authHeaders });
       if (!res.ok) throw new Error(`Error fetching ${endpoint}: ${res.status}`);
       return res.json();
     }
 
-    // Запит POST/PUT/DELETE
     async function sendData(endpoint, method, data) {
       const res = await fetch(`${API_URL}${endpoint}`, {
         method,
@@ -159,9 +277,6 @@
       return res.json();
     }
 
-    // ------------------ ОНОВЛЕННЯ ІНТЕРФЕЙСУ -------------------
-
-    // Завантажити і показати транзакції
     async function loadTransactions() {
       try {
         const transactions = await getData('/transactions/');
@@ -169,7 +284,6 @@
         transactions.forEach(tx => {
           const li = document.createElement('li');
           li.textContent = `${tx.amount.toFixed(2)} грн — ${tx.description || ''} (${tx.transaction_date})`;
-          // кнопки редагувати і видалити
           const editBtn = document.createElement('button');
           editBtn.textContent = 'Редагувати';
           editBtn.onclick = () => editTransaction(tx);
@@ -187,7 +301,6 @@
       }
     }
 
-    // Завантажити і показати категорії
     async function loadCategories() {
       try {
         const categories = await getData('/categories/');
@@ -195,10 +308,8 @@
         transactionCategorySelect.innerHTML = '';
         budgetCategorySelect.innerHTML = '';
         categories.forEach(cat => {
-          // Список категорій для перегляду
           const li = document.createElement('li');
           li.textContent = `${cat.name} (${cat.type})`;
-          // Редагування/видалення
           const editBtn = document.createElement('button');
           editBtn.textContent = 'Редагувати';
           editBtn.onclick = () => editCategory(cat);
@@ -211,7 +322,6 @@
           li.appendChild(actions);
           categoriesList.appendChild(li);
 
-          // Опції в селектах форм транзакцій і бюджетів
           const option1 = document.createElement('option');
           option1.value = cat.id;
           option1.textContent = cat.name + " (" + cat.type + ")";
@@ -227,7 +337,6 @@
       }
     }
 
-    // Завантажити і показати бюджети
     async function loadBudgets() {
       try {
         const budgets = await getData('/budgets/');
@@ -235,7 +344,6 @@
         budgets.forEach(budget => {
           const li = document.createElement('li');
           li.textContent = `${budget.amount_limit.toFixed(2)} грн — ${budget.month} — Категорія: ${budget.category.name}`;
-          // Редагувати / Видалити
           const editBtn = document.createElement('button');
           editBtn.textContent = 'Редагувати';
           editBtn.onclick = () => editBudget(budget);
@@ -253,8 +361,7 @@
       }
     }
 
-    // ------------------ РЕДАГУВАННЯ ----------------------------
-
+    // Редагування
     function editTransaction(tx) {
       transactionIdInput.value = tx.id;
       transactionCategorySelect.value = tx.category_id || '';
@@ -279,8 +386,7 @@
       budgetCancelBtn.style.display = 'inline';
     }
 
-    // ------------------ ВІДМІНА РЕДАГУВАННЯ ----------------------
-
+    // Відміна
     transactionCancelBtn.onclick = () => {
       transactionForm.reset();
       transactionIdInput.value = '';
@@ -299,13 +405,13 @@
       budgetCancelBtn.style.display = 'none';
     };
 
-    // ------------------ ВИДАЛЕННЯ -----------------------------
-
+    // Видалення
     async function deleteTransaction(id) {
       if (!confirm('Видалити транзакцію?')) return;
       try {
         await sendData(`/transactions/${id}`, 'DELETE');
-        loadTransactions();
+        await loadTransactions();
+        renderCharts();
       } catch (e) {
         alert('Помилка видалення транзакції: ' + e.message);
       }
@@ -315,9 +421,10 @@
       if (!confirm('Видалити категорію?')) return;
       try {
         await sendData(`/categories/${id}`, 'DELETE');
-        loadCategories();
-        loadTransactions();
-        loadBudgets();
+        await loadCategories();
+        await loadTransactions();
+        await loadBudgets();
+        renderCharts();
       } catch (e) {
         alert('Помилка видалення категорії: ' + e.message);
       }
@@ -327,14 +434,13 @@
       if (!confirm('Видалити бюджет?')) return;
       try {
         await sendData(`/budgets/${id}`, 'DELETE');
-        loadBudgets();
+        await loadBudgets();
       } catch (e) {
         alert('Помилка видалення бюджету: ' + e.message);
       }
     }
 
-    // ------------------ ДОДАВАННЯ/ОНОВЛЕННЯ ---------------------
-
+    // Додавання / оновлення
     transactionForm.onsubmit = async (e) => {
       e.preventDefault();
       const id = transactionIdInput.value;
@@ -352,7 +458,8 @@
         }
         transactionForm.reset();
         transactionCancelBtn.style.display = 'none';
-        loadTransactions();
+        await loadTransactions();
+        renderCharts();
       } catch (e) {
         alert('Помилка збереження транзакції: ' + e.message);
       }
@@ -373,9 +480,10 @@
         }
         categoryForm.reset();
         categoryCancelBtn.style.display = 'none';
-        loadCategories();
-        loadTransactions();
-        loadBudgets();
+        await loadCategories();
+        await loadTransactions();
+        await loadBudgets();
+        renderCharts();
       } catch (e) {
         alert('Помилка збереження категорії: ' + e.message);
       }
@@ -397,19 +505,18 @@
         }
         budgetForm.reset();
         budgetCancelBtn.style.display = 'none';
-        loadBudgets();
+        await loadBudgets();
       } catch (e) {
         alert('Помилка збереження бюджету: ' + e.message);
       }
     };
-
-    // ------------------ ІНІЦІАЛІЗАЦІЯ ----------------------------
 
     async function init() {
       try {
         await loadCategories();
         await loadTransactions();
         await loadBudgets();
+        renderCharts();
       } catch (e) {
         alert('Помилка ініціалізації: ' + e.message);
       }
@@ -421,6 +528,158 @@
       localStorage.removeItem('access_token');
       window.location.href = '/';
     }
+
+    // --- Графіки ---
+    let incomeExpenseChartInstance = null;
+let expenseByCategoryChartInstance = null;
+let monthlyBalanceChartInstance = null;
+let expensesByTypeChartInstance = null;
+
+async function renderCharts() {
+  const token = localStorage.getItem("access_token");
+
+  const txRes = await fetch(`${API_URL}/transactions/`, {
+    headers: { Authorization: "Bearer " + token }
+  });
+  const transactions = await txRes.json();
+
+  const catRes = await fetch(`${API_URL}/categories/`, {
+    headers: { Authorization: "Bearer " + token }
+  });
+  const categories = await catRes.json();
+
+  let incomeTotal = 0, expenseTotal = 0;
+  const expenseByCategory = {};
+
+  // Для балансу по місяцях
+  const balanceByMonth = {};
+
+  // Для суми по типах категорій
+  const sumsByType = { income: 0, expense: 0 };
+
+  transactions.forEach(tx => {
+    const cat = categories.find(c => c.id === tx.category_id);
+    if (!cat) return;
+
+    // Загальні суми
+    if (cat.type === "income") {
+      incomeTotal += tx.amount;
+      sumsByType.income += tx.amount;
+    } else {
+      expenseTotal += tx.amount;
+      sumsByType.expense += tx.amount;
+
+      if (!expenseByCategory[cat.name]) {
+        expenseByCategory[cat.name] = 0;
+      }
+      expenseByCategory[cat.name] += tx.amount;
+    }
+
+    // Баланс по місяцях
+    const date = new Date(tx.transaction_date);
+    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+
+    if (!balanceByMonth[monthKey]) balanceByMonth[monthKey] = 0;
+    balanceByMonth[monthKey] += (cat.type === "income" ? tx.amount : -tx.amount);
+  });
+
+  // Відсортовані місяці
+  const sortedMonths = Object.keys(balanceByMonth).sort();
+
+  // Кумиулятивний баланс
+  let cumulative = 0;
+  const cumulativeBalance = sortedMonths.map(m => cumulative += balanceByMonth[m]);
+
+  // Якщо графіки вже створені — оновлюємо їх
+  if (incomeExpenseChartInstance) incomeExpenseChartInstance.destroy();
+  if (expenseByCategoryChartInstance) expenseByCategoryChartInstance.destroy();
+  if (monthlyBalanceChartInstance) monthlyBalanceChartInstance.destroy();
+  if (expensesByTypeChartInstance) expensesByTypeChartInstance.destroy();
+
+  incomeExpenseChartInstance = new Chart(document.getElementById("incomeExpenseChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Доходи", "Витрати"],
+      datasets: [{
+        data: [incomeTotal, expenseTotal],
+        backgroundColor: ["#4CAF50", "#F44336"]
+      }]
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Доходи vs Витрати" }
+      }
+    }
+  });
+
+  expenseByCategoryChartInstance = new Chart(document.getElementById("expenseByCategoryChart"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(expenseByCategory),
+      datasets: [{
+        label: "Сума (грн)",
+        data: Object.values(expenseByCategory),
+        backgroundColor: "#2196F3"
+      }]
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Витрати по категоріях" }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  monthlyBalanceChartInstance = new Chart(document.getElementById("monthlyBalanceChart"), {
+    type: "line",
+    data: {
+      labels: sortedMonths,
+      datasets: [{
+        label: "Накопичений баланс (грн)",
+        data: cumulativeBalance,
+        fill: true,
+        backgroundColor: "rgba(33, 150, 243, 0.2)",
+        borderColor: "#2196F3",
+        tension: 0.3,
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Динаміка накопиченого балансу по місяцях" }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  expensesByTypeChartInstance = new Chart(document.getElementById("expensesByTypeChart"), {
+    type: "bar",
+    data: {
+      labels: ["Доходи", "Витрати"],
+      datasets: [{
+        label: "Сума (грн)",
+        data: [sumsByType.income, sumsByType.expense],
+        backgroundColor: ["#4CAF50", "#F44336"]
+      }]
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Суми за типами категорій" }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+    window.addEventListener('DOMContentLoaded', () => {
+      init();
+    });
   </script>
 </body>
 </html>
