@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, Literal
 from datetime import date
 
 class UserCreate(BaseModel):
@@ -50,7 +50,7 @@ class Transaction(TransactionBase):
 
 class CategoryBase(BaseModel):
     name: str
-    type: str  # 'income' або 'expense'
+    type: Literal['income', 'expense', 'saving'] # 'income' або 'expense'
 
 class CategoryCreate(CategoryBase):
     pass

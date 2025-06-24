@@ -5,149 +5,132 @@
   <title>Особистий фінансовий кабінет</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 1100px;
-    margin: 1rem auto;
-    padding: 1rem;
-    background: linear-gradient(135deg, #87CEFA 0%, #C0C0C0 100%);
-    color: #222;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 1rem;
+      background: linear-gradient(135deg, #87CEFA 0%, #C0C0C0 100%);
+      color: #222;
+    }
 
-  h2, h3 {
-    margin-top: 1.5rem;
-    color: #0D47A1; /* темно-синій відтінок для заголовків */
-  }
+    h2, h3 {
+      margin-top: 1.5rem;
+      color: #0D47A1;
+    }
 
-  .section {
-    margin-bottom: 2rem;
-    border: 1px solid #ccc;
-    padding: 1rem;
-    border-radius: 8px;
-    background-color: rgba(255 255 255 / 0.85);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
+    .section {
+      margin-bottom: 2rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
 
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1rem;
-  }
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
 
-  .graph-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-  }
+    .graph-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      justify-items: center;
+    }
 
-  canvas {
-    max-width: 320px;
-    max-height: 240px; /* щоб не було дуже високі */
-    width: 100% !important;
-    height: auto !important;
-    border-radius: 6px;
-    background-color: white;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.15);
-  }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 1 / 1 !important;
+      max-width: 400px;
+      border-radius: 6px;
+      background-color: white;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+    }
 
-  form {
-    margin-top: 1rem;
-  }
+    form {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
 
-  label {
-    display: block;
-    margin: 0.4rem 0 0.1rem 0;
-    font-weight: 600;
-    color: #1A237E;
-  }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      color: #1A237E;
+    }
 
-  input, select, button {
-    margin-top: 0.2rem;
-    padding: 0.4rem 0.5rem;
-    width: 100%;
-    max-width: 280px;
-    border: 1px solid #90CAF9;
-    border-radius: 4px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-  }
+    input, select, button {
+      padding: 0.4rem 0.5rem;
+      width: 100%;
+      border: 1px solid #90CAF9;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
 
-  input:focus, select:focus {
-    border-color: #0D47A1;
-    outline: none;
-    box-shadow: 0 0 6px #0D47A1aa;
-  }
+    input:focus, select:focus {
+      border-color: #0D47A1;
+      outline: none;
+      box-shadow: 0 0 6px #0D47A1aa;
+    }
 
-  button {
-    width: auto;
-    cursor: pointer;
-    background-color: #1976D2;
-    border: none;
-    color: white;
-    font-weight: 700;
-    margin-top: 0.8rem;
-    border-radius: 4px;
-    padding: 0.5rem 1.2rem;
-    transition: background-color 0.3s ease;
-  }
+    button {
+      width: auto;
+      cursor: pointer;
+      background-color: #1976D2;
+      border: none;
+      color: white;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 0.5rem 1.2rem;
+      transition: background-color 0.3s ease;
+    }
 
-  button:hover {
-    background-color: #0D47A1;
-  }
+    button:hover {
+      background-color: #0D47A1;
+    }
 
-  ul {
-    list-style: none;
-    padding-left: 0;
-    max-height: 220px;
-    overflow-y: auto;
-    border: 1px solid #90CAF9;
-    border-radius: 6px;
-    background-color: white;
-    box-shadow: inset 0 1px 4px #90caf933;
-  }
+    ul {
+      list-style: none;
+      padding-left: 0;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #90CAF9;
+      border-radius: 6px;
+      background-color: white;
+      box-shadow: inset 0 1px 4px #90caf933;
+    }
 
-  li {
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 0.4rem;
-    font-size: 0.95rem;
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .item-actions button {
-    margin-left: 0.5rem;
-    background-color: #64B5F6;
-    border: none;
-    color: #fff;
-    padding: 0.2rem 0.6rem;
-    border-radius: 3px;
-    font-size: 0.85rem;
-  }
-
-  .item-actions button:hover {
-    background-color: #1976D2;
-  }
-</style>
+    li {
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.4rem;
+      font-size: 0.95rem;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
   <h2>Особистий фінансовий кабінет</h2>
   <button onclick="logout()">Вийти</button>
   <p id="username"></p>
 
-  <div class="grid-container">
+  <div class="grid-top">
+    <!-- Форма транзакції -->
     <div class="section">
-      <h3>Ваші транзакції</h3>
-      <ul id="transactions-list"></ul>
-    </div>
-
-    <div class="section">
-      <h3>Додати / Редагувати транзакцію</h3>
+      <h3>Додати транзакцію</h3>
       <form id="transaction-form">
-        <input type="hidden" id="transaction-id" />
         <label>Категорія:
           <select id="transaction-category" required></select>
         </label>
@@ -157,21 +140,17 @@
         <label>Опис:
           <input type="text" id="transaction-description" />
         </label>
-        <label>Дата транзакції:
+        <label>Дата:
           <input type="date" id="transaction-date" required />
         </label>
-        <button type="submit">Зберегти транзакцію</button>
-        <button type="button" id="transaction-cancel-btn" style="display:none;">Відмінити</button>
+        <button type="submit">Додати</button>
       </form>
     </div>
 
+    <!-- Форма категорії -->
     <div class="section">
-      <h3>Категорії</h3>
-      <ul id="categories-list"></ul>
-
-      <h3>Додати / Редагувати категорію</h3>
+      <h3>Додати категорію</h3>
       <form id="category-form">
-        <input type="hidden" id="category-id" />
         <label>Назва:
           <input type="text" id="category-name" required />
         </label>
@@ -179,506 +158,262 @@
           <select id="category-type" required>
             <option value="income">Доходи</option>
             <option value="expense">Витрати</option>
+            <option value="saving">Накопичення</option>
           </select>
         </label>
-        <button type="submit">Зберегти категорію</button>
-        <button type="button" id="category-cancel-btn" style="display:none;">Відмінити</button>
+        <button type="submit">Додати</button>
       </form>
     </div>
 
+    <!-- Форма бюджету -->
     <div class="section">
-      <h3>Додати / Редагувати бюджет</h3>
-      <ul id="budgets-list"></ul>
+      <h3>Додати бюджет</h3>
       <form id="budget-form">
-        <input type="hidden" id="budget-id" />
         <label>Категорія:
           <select id="budget-category" required></select>
         </label>
-        <label>Ліміт (грн):
+        <label>Ліміт:
           <input type="number" step="0.01" id="budget-amount" required />
         </label>
         <label>Місяць:
           <input type="month" id="budget-month" required />
         </label>
-        <button type="submit">Зберегти бюджет</button>
-        <button type="button" id="budget-cancel-btn" style="display:none;">Відмінити</button>
+        <button type="submit">Додати</button>
       </form>
     </div>
   </div>
 
+  <!-- Список транзакцій -->
   <div class="section">
-    <h3>Візуалізація фінансів</h3>
+    <h3>Ваші транзакції</h3>
+    <ul id="transactions-list"></ul>
+  </div>
+
+  <!-- Графіки -->
+  <div class="section">
+    <h3>Візуалізація</h3>
     <div class="graph-container">
-      <canvas id="incomeExpenseChart" width="350" height="350"></canvas>
-      <canvas id="expenseByCategoryChart" width="350" height="350"></canvas>
-      <canvas id="monthlyBalanceChart" width="350" height="350"></canvas>
-      <canvas id="expensesByTypeChart" width="350" height="350"></canvas>
+      <canvas id="incomeExpenseChart"></canvas>
+      <canvas id="expenseByCategoryChart"></canvas>
+      <canvas id="monthlyBalanceChart"></canvas>
+      <canvas id="expensesByTypeChart"></canvas>
+      <canvas id="averageExpenseChart"></canvas>
+      <canvas id="topSpendingDaysChart"></canvas>
     </div>
   </div>
 
   <script>
-    // Логіка роботи з API, формами, списками — додавай сюди код з dashboard.js
-
     const API_URL = 'http://127.0.0.1:8000';
     const token = localStorage.getItem('access_token');
-    if (!token) window.location.href = "/";
+    if (!token) window.location.href = '/';
+    const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
-    const authHeaders = {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    };
+    document.getElementById('username').textContent = 'Привіт!';
 
-    const usernameElem = document.getElementById('username');
-    usernameElem.textContent = "Привіт!";
-
-    // Елементи для транзакцій
-    const transactionsList = document.getElementById('transactions-list');
     const transactionForm = document.getElementById('transaction-form');
-    const transactionIdInput = document.getElementById('transaction-id');
-    const transactionCategorySelect = document.getElementById('transaction-category');
-    const transactionAmountInput = document.getElementById('transaction-amount');
-    const transactionDescriptionInput = document.getElementById('transaction-description');
-    const transactionDateInput = document.getElementById('transaction-date');
-    const transactionCancelBtn = document.getElementById('transaction-cancel-btn');
-
-    // Елементи для категорій
-    const categoriesList = document.getElementById('categories-list');
     const categoryForm = document.getElementById('category-form');
-    const categoryIdInput = document.getElementById('category-id');
-    const categoryNameInput = document.getElementById('category-name');
-    const categoryTypeSelect = document.getElementById('category-type');
-    const categoryCancelBtn = document.getElementById('category-cancel-btn');
-
-    // Елементи для бюджетів
-    const budgetsList = document.getElementById('budgets-list');
     const budgetForm = document.getElementById('budget-form');
-    const budgetIdInput = document.getElementById('budget-id');
+    const transactionsList = document.getElementById('transactions-list');
+    const categorySelect = document.getElementById('transaction-category');
     const budgetCategorySelect = document.getElementById('budget-category');
-    const budgetAmountInput = document.getElementById('budget-amount');
-    const budgetMonthInput = document.getElementById('budget-month');
-    const budgetCancelBtn = document.getElementById('budget-cancel-btn');
 
     async function getData(endpoint) {
-      const res = await fetch(`${API_URL}${endpoint}`, { headers: authHeaders });
-      if (!res.ok) throw new Error(`Error fetching ${endpoint}: ${res.status}`);
+      const res = await fetch(`${API_URL}${endpoint}`, { headers });
+      if (!res.ok) throw new Error(await res.text());
       return res.json();
     }
 
-    async function sendData(endpoint, method, data) {
+    async function postData(endpoint, data) {
       const res = await fetch(`${API_URL}${endpoint}`, {
-        method,
-        headers: authHeaders,
+        method: 'POST',
+        headers,
         body: JSON.stringify(data)
       });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Error sending data");
-      }
-      return res.json();
+      if (!res.ok) throw new Error(await res.text());
     }
 
-    async function loadTransactions() {
-      try {
-        const transactions = await getData('/transactions/');
-        transactionsList.innerHTML = '';
-        transactions.forEach(tx => {
-          const li = document.createElement('li');
-          li.textContent = `${tx.amount.toFixed(2)} грн — ${tx.description || ''} (${tx.transaction_date})`;
-          const editBtn = document.createElement('button');
-          editBtn.textContent = 'Редагувати';
-          editBtn.onclick = () => editTransaction(tx);
-          const delBtn = document.createElement('button');
-          delBtn.textContent = 'Видалити';
-          delBtn.onclick = () => deleteTransaction(tx.id);
-          const actions = document.createElement('span');
-          actions.className = 'item-actions';
-          actions.append(editBtn, delBtn);
-          li.appendChild(actions);
-          transactionsList.appendChild(li);
-        });
-      } catch (e) {
-        alert('Помилка завантаження транзакцій: ' + e.message);
-      }
+    async function renderTransactions() {
+      const tx = await getData('/transactions/');
+      // Сортуємо за датою від найновішої до найстаршої
+      tx.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
+      transactionsList.innerHTML = '';
+      tx.forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = `${t.amount} грн — ${t.description} (${t.transaction_date})`;
+        transactionsList.appendChild(li);
+      });
     }
 
-    async function loadCategories() {
-      try {
-        const categories = await getData('/categories/');
-        categoriesList.innerHTML = '';
-        transactionCategorySelect.innerHTML = '';
-        budgetCategorySelect.innerHTML = '';
-        categories.forEach(cat => {
-          const li = document.createElement('li');
-          li.textContent = `${cat.name} (${cat.type})`;
-          const editBtn = document.createElement('button');
-          editBtn.textContent = 'Редагувати';
-          editBtn.onclick = () => editCategory(cat);
-          const delBtn = document.createElement('button');
-          delBtn.textContent = 'Видалити';
-          delBtn.onclick = () => deleteCategory(cat.id);
-          const actions = document.createElement('span');
-          actions.className = 'item-actions';
-          actions.append(editBtn, delBtn);
-          li.appendChild(actions);
-          categoriesList.appendChild(li);
-
-          const option1 = document.createElement('option');
-          option1.value = cat.id;
-          option1.textContent = cat.name + " (" + cat.type + ")";
-          transactionCategorySelect.appendChild(option1);
-
-          const option2 = document.createElement('option');
-          option2.value = cat.id;
-          option2.textContent = cat.name + " (" + cat.type + ")";
-          budgetCategorySelect.appendChild(option2);
-        });
-      } catch(e) {
-        alert('Помилка завантаження категорій: ' + e.message);
-      }
+    async function renderCategories() {
+      const categories = await getData('/categories/');
+      categorySelect.innerHTML = '';
+      budgetCategorySelect.innerHTML = '';
+      categories.forEach(cat => {
+        const opt = new Option(cat.name + ' (' + cat.type + ')', cat.id);
+        categorySelect.appendChild(opt);
+        budgetCategorySelect.appendChild(opt.cloneNode(true));
+      });
     }
 
-    async function loadBudgets() {
-      try {
-        const budgets = await getData('/budgets/');
-        budgetsList.innerHTML = '';
-        budgets.forEach(budget => {
-          const li = document.createElement('li');
-          li.textContent = `${budget.amount_limit.toFixed(2)} грн — ${budget.month} — Категорія: ${budget.category.name}`;
-          const editBtn = document.createElement('button');
-          editBtn.textContent = 'Редагувати';
-          editBtn.onclick = () => editBudget(budget);
-          const delBtn = document.createElement('button');
-          delBtn.textContent = 'Видалити';
-          delBtn.onclick = () => deleteBudget(budget.id);
-          const actions = document.createElement('span');
-          actions.className = 'item-actions';
-          actions.append(editBtn, delBtn);
-          li.appendChild(actions);
-          budgetsList.appendChild(li);
-        });
-      } catch (e) {
-        alert('Помилка завантаження бюджетів: ' + e.message);
-      }
-    }
-
-    // Редагування
-    function editTransaction(tx) {
-      transactionIdInput.value = tx.id;
-      transactionCategorySelect.value = tx.category_id || '';
-      transactionAmountInput.value = tx.amount;
-      transactionDescriptionInput.value = tx.description || '';
-      transactionDateInput.value = tx.transaction_date;
-      transactionCancelBtn.style.display = 'inline';
-    }
-
-    function editCategory(cat) {
-      categoryIdInput.value = cat.id;
-      categoryNameInput.value = cat.name;
-      categoryTypeSelect.value = cat.type;
-      categoryCancelBtn.style.display = 'inline';
-    }
-
-    function editBudget(budget) {
-      budgetIdInput.value = budget.id;
-      budgetCategorySelect.value = budget.category_id;
-      budgetAmountInput.value = budget.amount_limit;
-      budgetMonthInput.value = budget.month;
-      budgetCancelBtn.style.display = 'inline';
-    }
-
-    // Відміна
-    transactionCancelBtn.onclick = () => {
-      transactionForm.reset();
-      transactionIdInput.value = '';
-      transactionCancelBtn.style.display = 'none';
-    };
-
-    categoryCancelBtn.onclick = () => {
-      categoryForm.reset();
-      categoryIdInput.value = '';
-      categoryCancelBtn.style.display = 'none';
-    };
-
-    budgetCancelBtn.onclick = () => {
-      budgetForm.reset();
-      budgetIdInput.value = '';
-      budgetCancelBtn.style.display = 'none';
-    };
-
-    // Видалення
-    async function deleteTransaction(id) {
-      if (!confirm('Видалити транзакцію?')) return;
-      try {
-        await sendData(`/transactions/${id}`, 'DELETE');
-        await loadTransactions();
-        renderCharts();
-      } catch (e) {
-        alert('Помилка видалення транзакції: ' + e.message);
-      }
-    }
-
-    async function deleteCategory(id) {
-      if (!confirm('Видалити категорію?')) return;
-      try {
-        await sendData(`/categories/${id}`, 'DELETE');
-        await loadCategories();
-        await loadTransactions();
-        await loadBudgets();
-        renderCharts();
-      } catch (e) {
-        alert('Помилка видалення категорії: ' + e.message);
-      }
-    }
-
-    async function deleteBudget(id) {
-      if (!confirm('Видалити бюджет?')) return;
-      try {
-        await sendData(`/budgets/${id}`, 'DELETE');
-        await loadBudgets();
-      } catch (e) {
-        alert('Помилка видалення бюджету: ' + e.message);
-      }
-    }
-
-    // Додавання / оновлення
     transactionForm.onsubmit = async (e) => {
       e.preventDefault();
-      const id = transactionIdInput.value;
-      const data = {
-        category_id: transactionCategorySelect.value || null,
-        amount: parseFloat(transactionAmountInput.value),
-        description: transactionDescriptionInput.value,
-        transaction_date: transactionDateInput.value
-      };
-      try {
-        if (id) {
-          await sendData(`/transactions/${id}`, 'PUT', data);
-        } else {
-          await sendData('/transactions/', 'POST', data);
-        }
-        transactionForm.reset();
-        transactionCancelBtn.style.display = 'none';
-        await loadTransactions();
-        renderCharts();
-      } catch (e) {
-        alert('Помилка збереження транзакції: ' + e.message);
-      }
+      await postData('/transactions/', {
+        category_id: categorySelect.value,
+        amount: parseFloat(document.getElementById('transaction-amount').value),
+        description: document.getElementById('transaction-description').value,
+        transaction_date: document.getElementById('transaction-date').value
+      });
+      transactionForm.reset();
+      await renderTransactions();
+      await renderCharts();
     };
 
     categoryForm.onsubmit = async (e) => {
       e.preventDefault();
-      const id = categoryIdInput.value;
-      const data = {
-        name: categoryNameInput.value,
-        type: categoryTypeSelect.value
-      };
-      try {
-        if (id) {
-          await sendData(`/categories/${id}`, 'PUT', data);
-        } else {
-          await sendData('/categories/', 'POST', data);
-        }
-        categoryForm.reset();
-        categoryCancelBtn.style.display = 'none';
-        await loadCategories();
-        await loadTransactions();
-        await loadBudgets();
-        renderCharts();
-      } catch (e) {
-        alert('Помилка збереження категорії: ' + e.message);
-      }
+      await postData('/categories/', {
+        name: document.getElementById('category-name').value,
+        type: document.getElementById('category-type').value
+      });
+      categoryForm.reset();
+      await renderCategories();
     };
 
     budgetForm.onsubmit = async (e) => {
       e.preventDefault();
-      const id = budgetIdInput.value;
-      const data = {
+      await postData('/budgets/', {
         category_id: budgetCategorySelect.value,
-        amount_limit: parseFloat(budgetAmountInput.value),
-        month: budgetMonthInput.value
-      };
-      try {
-        if (id) {
-          await sendData(`/budgets/${id}`, 'PUT', data);
-        } else {
-          await sendData('/budgets/', 'POST', data);
-        }
-        budgetForm.reset();
-        budgetCancelBtn.style.display = 'none';
-        await loadBudgets();
-      } catch (e) {
-        alert('Помилка збереження бюджету: ' + e.message);
-      }
+        amount_limit: parseFloat(document.getElementById('budget-amount').value),
+        month: document.getElementById('budget-month').value
+      });
+      budgetForm.reset();
     };
 
-    async function init() {
-      try {
-        await loadCategories();
-        await loadTransactions();
-        await loadBudgets();
-        renderCharts();
-      } catch (e) {
-        alert('Помилка ініціалізації: ' + e.message);
-      }
-    }
+    let incomeExpenseChart, expenseByCategoryChart, monthlyBalanceChart, expensesByTypeChart, averageExpenseChart, topSpendingDaysChart;
 
-    init();
+    async function renderCharts() {
+      const tx = await getData('/transactions/');
+      const categories = await getData('/categories/');
+
+      const incomeExpenseChartCanvas = document.getElementById('incomeExpenseChart');
+      const expenseByCategoryChartCanvas = document.getElementById('expenseByCategoryChart');
+      const monthlyBalanceChartCanvas = document.getElementById('monthlyBalanceChart');
+      const expensesByTypeChartCanvas = document.getElementById('expensesByTypeChart');
+      const averageExpenseChartCanvas = document.getElementById('averageExpenseChart');
+      const topSpendingDaysChartCanvas = document.getElementById('topSpendingDaysChart');
+
+      let income = 0, expense = 0, saving = 0;
+      const expenseByCat = {};
+      const balanceByMonth = {};
+      const expensesByDay = {};
+      const typeSums = { income: 0, expense: 0, saving: 0 };
+
+      tx.forEach(t => {
+        const cat = categories.find(c => c.id === t.category_id);
+        if (!cat) return;
+
+        const d = new Date(t.transaction_date);
+        const month = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+        const day = `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+
+        if (cat.type === 'income') {
+          balanceByMonth[month] = (balanceByMonth[month] || 0) + t.amount;
+          income += t.amount;
+          typeSums.income += t.amount;
+        } else if (cat.type === 'expense') {
+          balanceByMonth[month] = (balanceByMonth[month] || 0) - t.amount;
+          expense += t.amount;
+          typeSums.expense += t.amount;
+          expenseByCat[cat.name] = (expenseByCat[cat.name] || 0) + t.amount;
+          expensesByDay[day] = (expensesByDay[day] || 0) + t.amount;
+        } else if (cat.type === 'saving') {
+          // накопичення не впливає на баланс
+          saving += t.amount;
+          typeSums.saving += t.amount;
+          // можна додати логіку для накопичення по категоріях, якщо треба
+        }
+      });
+
+      const months = Object.keys(balanceByMonth).sort();
+      let cumulative = 0;
+      const cumulativeBalance = months.map(m => cumulative += balanceByMonth[m]);
+
+      const avg = tx.filter(t => {
+        const cat = categories.find(c => c.id === t.category_id);
+        return cat && cat.type === 'expense';
+      }).reduce((acc, t, _, arr) => acc + t.amount / arr.length, 0);
+
+      const topDays = Object.entries(expensesByDay).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+      [incomeExpenseChart, expenseByCategoryChart, monthlyBalanceChart, expensesByTypeChart, averageExpenseChart, topSpendingDaysChart].forEach(chart => chart?.destroy());
+
+      incomeExpenseChart = new Chart(incomeExpenseChartCanvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Доходи', 'Витрати'],
+          datasets: [{ data: [income, expense], backgroundColor: ['#4CAF50', '#F44336'] }]
+        },
+        options: { plugins: { title: { display: true, text: 'Доходи vs Витрати' } } }
+      });
+
+      expenseByCategoryChart = new Chart(expenseByCategoryChartCanvas, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(expenseByCat),
+          datasets: [{ label: 'Сума', data: Object.values(expenseByCat), backgroundColor: '#2196F3' }]
+        },
+        options: { plugins: { title: { display: true, text: 'Витрати по категоріях' } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      monthlyBalanceChart = new Chart(monthlyBalanceChartCanvas, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [{ label: 'Баланс', data: cumulativeBalance, fill: true, backgroundColor: 'rgba(33,150,243,0.2)', borderColor: '#2196F3', tension: 0.3 }]
+        },
+        options: { plugins: { title: { display: true, text: 'Баланс по місяцях' } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      expensesByTypeChart = new Chart(expensesByTypeChartCanvas, {
+        type: 'bar',
+        data: {
+          labels: ['Доходи', 'Витрати', 'Накопичення'],
+          datasets: [{
+            label: 'Сума',
+            data: [typeSums.income, typeSums.expense, typeSums.saving],
+            backgroundColor: ['#4CAF50', '#F44336', '#FFC107'] // зелений, червоний, жовтий
+          }]
+        },
+        options: { plugins: { title: { display: true, text: 'Типи категорій' } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      averageExpenseChart = new Chart(averageExpenseChartCanvas, {
+        type: 'bar',
+        data: {
+          labels: ['Середні витрати'],
+          datasets: [{ label: 'Сума', data: [avg], backgroundColor: '#FF9800' }]
+        },
+        options: { plugins: { title: { display: true, text: 'Середній розмір витрат' } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      topSpendingDaysChart = new Chart(topSpendingDaysChartCanvas, {
+        type: 'bar',
+        data: {
+          labels: topDays.map(d => d[0]),
+          datasets: [{ label: 'Сума', data: topDays.map(d => d[1]), backgroundColor: '#E91E63' }]
+        },
+        options: { plugins: { title: { display: true, text: 'Топ 5 днів по витратах' } }, scales: { y: { beginAtZero: true } } }
+      });
+    }
 
     function logout() {
       localStorage.removeItem('access_token');
       window.location.href = '/';
     }
 
-    // --- Графіки ---
-    let incomeExpenseChartInstance = null;
-let expenseByCategoryChartInstance = null;
-let monthlyBalanceChartInstance = null;
-let expensesByTypeChartInstance = null;
-
-async function renderCharts() {
-  const token = localStorage.getItem("access_token");
-
-  const txRes = await fetch(`${API_URL}/transactions/`, {
-    headers: { Authorization: "Bearer " + token }
-  });
-  const transactions = await txRes.json();
-
-  const catRes = await fetch(`${API_URL}/categories/`, {
-    headers: { Authorization: "Bearer " + token }
-  });
-  const categories = await catRes.json();
-
-  let incomeTotal = 0, expenseTotal = 0;
-  const expenseByCategory = {};
-
-  // Для балансу по місяцях
-  const balanceByMonth = {};
-
-  // Для суми по типах категорій
-  const sumsByType = { income: 0, expense: 0 };
-
-  transactions.forEach(tx => {
-    const cat = categories.find(c => c.id === tx.category_id);
-    if (!cat) return;
-
-    // Загальні суми
-    if (cat.type === "income") {
-      incomeTotal += tx.amount;
-      sumsByType.income += tx.amount;
-    } else {
-      expenseTotal += tx.amount;
-      sumsByType.expense += tx.amount;
-
-      if (!expenseByCategory[cat.name]) {
-        expenseByCategory[cat.name] = 0;
-      }
-      expenseByCategory[cat.name] += tx.amount;
-    }
-
-    // Баланс по місяцях
-    const date = new Date(tx.transaction_date);
-    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-
-    if (!balanceByMonth[monthKey]) balanceByMonth[monthKey] = 0;
-    balanceByMonth[monthKey] += (cat.type === "income" ? tx.amount : -tx.amount);
-  });
-
-  // Відсортовані місяці
-  const sortedMonths = Object.keys(balanceByMonth).sort();
-
-  // Кумиулятивний баланс
-  let cumulative = 0;
-  const cumulativeBalance = sortedMonths.map(m => cumulative += balanceByMonth[m]);
-
-  // Якщо графіки вже створені — оновлюємо їх
-  if (incomeExpenseChartInstance) incomeExpenseChartInstance.destroy();
-  if (expenseByCategoryChartInstance) expenseByCategoryChartInstance.destroy();
-  if (monthlyBalanceChartInstance) monthlyBalanceChartInstance.destroy();
-  if (expensesByTypeChartInstance) expensesByTypeChartInstance.destroy();
-
-  incomeExpenseChartInstance = new Chart(document.getElementById("incomeExpenseChart"), {
-    type: "doughnut",
-    data: {
-      labels: ["Доходи", "Витрати"],
-      datasets: [{
-        data: [incomeTotal, expenseTotal],
-        backgroundColor: ["#4CAF50", "#F44336"]
-      }]
-    },
-    options: {
-      plugins: {
-        title: { display: true, text: "Доходи vs Витрати" }
-      }
-    }
-  });
-
-  expenseByCategoryChartInstance = new Chart(document.getElementById("expenseByCategoryChart"), {
-    type: "bar",
-    data: {
-      labels: Object.keys(expenseByCategory),
-      datasets: [{
-        label: "Сума (грн)",
-        data: Object.values(expenseByCategory),
-        backgroundColor: "#2196F3"
-      }]
-    },
-    options: {
-      plugins: {
-        title: { display: true, text: "Витрати по категоріях" }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
-
-  monthlyBalanceChartInstance = new Chart(document.getElementById("monthlyBalanceChart"), {
-    type: "line",
-    data: {
-      labels: sortedMonths,
-      datasets: [{
-        label: "Накопичений баланс (грн)",
-        data: cumulativeBalance,
-        fill: true,
-        backgroundColor: "rgba(33, 150, 243, 0.2)",
-        borderColor: "#2196F3",
-        tension: 0.3,
-        pointRadius: 4,
-      }]
-    },
-    options: {
-      plugins: {
-        title: { display: true, text: "Динаміка накопиченого балансу по місяцях" }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
-
-  expensesByTypeChartInstance = new Chart(document.getElementById("expensesByTypeChart"), {
-    type: "bar",
-    data: {
-      labels: ["Доходи", "Витрати"],
-      datasets: [{
-        label: "Сума (грн)",
-        data: [sumsByType.income, sumsByType.expense],
-        backgroundColor: ["#4CAF50", "#F44336"]
-      }]
-    },
-    options: {
-      plugins: {
-        title: { display: true, text: "Суми за типами категорій" }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
-}
-
-    window.addEventListener('DOMContentLoaded', () => {
-      init();
+    window.addEventListener('DOMContentLoaded', async () => {
+      await renderCategories();
+      await renderTransactions();
+      await renderCharts();
     });
   </script>
 </body>
